@@ -1,0 +1,29 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Runtime evidence and generated artifacts
+*.log
+*.jsonl
+*.zip
+*-receipt*.json*
+receipt.json
+state.json
+normalized.json
+/runs/
+/web-batches/
+/outputs/
+/output/
+/experiment-*/
+/comparison-*/
+/inventory.json

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent 同任务评测"
+  short_description: "发布到 Codex、WorkBuddy、即先、Mesh 和 Epsilon API，比较指标与完成效果"
+  default_prompt: "使用 $agent-run-compare，将我指定的同一任务发布到选定的 Codex、WorkBuddy、即先 AI 桌面模块、Mesh API 或 Epsilon API 平台，实时追踪执行并做模型评价与人工复核。"

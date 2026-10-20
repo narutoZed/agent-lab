@@ -1,0 +1,52 @@
+{
+  "title": "同一任务发布与跟踪",
+  "prompt": "替换为需要在所选平台执行的同一任务。文件附件仅用于明确支持附件和工作目录绑定的平台；HTTP 入口请先使用纯文本任务。",
+  "context_id": "同一输入数据版本与验收标准",
+  "alignment_confirmed": false,
+  "criteria": [
+    {
+      "id": "outcome",
+      "description": "最终回答或实际产物完整满足用户任务要求，关键结果有可验证依据",
+      "required": true,
+      "verification": "answer"
+    }
+  ],
+  "input_files": [],
+  "providers": {
+    "codex": {
+      "driver": "codex_cli",
+      "executable": "codex",
+      "sandbox": "workspace-write",
+      "timeout_seconds": 900
+    },
+    "workbuddy": {
+      "driver": "workbuddy_desktop",
+      "node": "node",
+      "port": 9335,
+      "timeout_seconds": 900
+    },
+    "jahead": {
+      "driver": "jahead_desktop",
+      "node": "node",
+      "port": 9336,
+      "mode": "expert",
+      "web-search": "true",
+      "timeout_seconds": 900,
+      "module": "report"
+    },
+    "mesh": {
+      "driver": "mesh_api",
+      "base_url": "http://127.0.0.1:18004",
+      "timeout_seconds": 1800
+    },
+    "epsilon": {
+      "driver": "epsilon_api",
+      "base_url": "http://127.0.0.1:30100",
+      "timeout_seconds": 1800
+    }
+  },
+  "interaction_policy": {
+    "questions": "recommended",
+    "permissions": "approve"
+  }
+}

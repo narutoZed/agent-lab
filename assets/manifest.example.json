@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "title": "同一任务的五平台对比",
+  "tasks": [
+    {
+      "id": "case-001",
+      "title": "替换为实际任务名称",
+      "prompt": "替换为统一任务要求",
+      "context_id": "input-data-v1-and-tool-permissions-v1",
+      "alignment_confirmed": false,
+      "alignment_notes": "确认所有运行使用相同任务、输入数据、工具权限和任务范围后再改为 true",
+      "criteria": [
+        {
+          "id": "requirements",
+          "description": "最终回答覆盖任务全部明确要求，无关键遗漏",
+          "required": true,
+          "verification": "answer"
+        },
+        {
+          "id": "correctness",
+          "description": "关键事实与计算可由提供的输入和产物证据验证",
+          "required": true,
+          "verification": "answer"
+        },
+        {
+          "id": "artifact",
+          "description": "实际产物存在且内容满足任务要求；缺产物内容则未判定",
+          "required": true,
+          "verification": "artifact"
+        }
+      ],
+      "runs": [
+        {
+          "id": "codex-1",
+          "label": "Codex 第一次",
+          "platform": "codex",
+          "path": "~/.codex/sessions/YYYY/MM/DD/rollout-example.jsonl",
+          "selector": {
+            "turn_id": "从 inventory 复制"
+          },
+          "artifacts": []
+        },
+        {
+          "id": "workbuddy-1",
+          "label": "WorkBuddy 第一次",
+          "platform": "workbuddy",
+          "path": "~/.workbuddy-ai/projects/workspace/session.jsonl",
+          "selector": {
+            "request_id": "从 inventory 复制"
+          },
+          "artifacts": []
+        },
+        {
+          "id": "jahead-1",
+          "label": "即先第一次",
+          "platform": "jahead",
+          "path": "./uploads/reporting_session_trajectory.jsonl",
+          "selector": {
+            "record_id": "从 inventory 复制"
+          },
+          "artifacts": []
+        },
+        {
+          "id": "mesh-1",
+          "label": "Mesh 第一次",
+          "platform": "mesh",
+          "path": "./uploads/mesh-session.jsonl",
+          "selector": {
+            "run_id": "从 inventory 复制"
+          },
+          "artifacts": []
+        },
+        {
+          "id": "epsilon-1",
+          "label": "Epsilon 第一次",
+          "platform": "epsilon",
+          "path": "./uploads/epsilon-session.jsonl",
+          "selector": {
+            "session_id": "从 inventory 复制"
+          },
+          "artifacts": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="console-token" content="__CSRF_TOKEN__">
+  <title>Agent 任务发布台</title><link rel="stylesheet" href="/console.css"><script src="/console.js" defer></script>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/" aria-label="任务发布台首页"><span class="brand-icon">A</span><span>Agent Lab<small>任务发布与对比</small></span></a>
+  <span class="nav-caption">工作空间</span>
+  <button class="nav active" id="nav-prepare">＋ <span>准备发布</span></button>
+  <button class="nav" id="nav-history">☷ <span>批次进度</span><span id="batch-badge">0</span></button>
+  <button class="nav" id="nav-comparison">▥ <span>指标对比</span></button>
+  <div class="sidebar-bottom"><span class="status-dot"></span> 本地控制台<small>任务由本机已登录的 Agent 执行</small></div>
+</aside>
+<main>
+  <header class="page-header"><div><p class="eyebrow">AGENT RUN COMPARE</p><h1 id="page-title">把任务交给合适的 Agent</h1><p class="subheading" id="page-subtitle">导入任务清单，选择需要执行的任务，一次发布到多个平台。</p></div><span class="local-pill">● 仅本机访问</span></header>
+  <div id="message" role="status" hidden></div>
+  <div id="recover" class="notice" hidden>有一笔发布结果尚未确认。<button id="recover-button">核查上次发布</button></div>
+  <section id="prepare-view">
+    <div class="steps"><span class="current"><b>1</b> 导入并选择任务</span><i>—</i><span><b>2</b> 设置平台和模型</span><i>—</i><span><b>3</b> 核对并发布</span></div>
+    <div class="workspace-grid">
+      <div class="task-area">
+        <section class="card import-card">
+          <div class="section-title"><div><span class="step-label">任务来源</span><h2>从 Excel 开始</h2></div><a href="/template.xlsx" download="任务导入模板.xlsx" class="text-button">↓ 下载模板</a></div>
+          <label class="drop-zone" id="drop-zone"><span class="file-symbol">▤</span><strong id="file-title">选择或拖入 XLSX 文件</strong><span>最多 10 MB · 首个非空行作为表头 · 导入后再勾选发布</span><input id="file" type="file" accept=".xlsx" aria-label="选择 XLSX 任务清单"></label>
+          <div class="import-foot"><span>支持中文、英文列名，可手动映射。</span><button id="add-manual" class="text-button">＋ 手动添加任务</button></div>
+          <div id="mapping" hidden>
+            <div class="mapping-top"><label>工作表<select id="sheet"></select></label><span class="hint">切换工作表或列映射会清空勾选。</span></div>
+            <div class="mapping-grid"><label>任务正文 <em>*</em><select id="map-prompt"></select></label><label>任务名称<select id="map-title"></select></label><label>任务编号<select id="map-id"></select></label><label>验收要求<select id="map-criteria"></select></label></div>
+          </div>
+        </section>
+        <section class="card task-card">
+          <div class="section-title"><div><span class="step-label">任务清单</span><h2>选择本次要执行的任务 <span id="row-count" class="count">0</span></h2></div><span id="selected-top" class="selection-label">已选 0 条</span></div>
+          <div class="toolbar"><input id="search" type="search" placeholder="搜索任务名称、编号或正文" aria-label="搜索任务"><button id="select-visible" class="secondary">选中筛选结果</button><button id="clear-selection" class="text-button">清空勾选</button></div>
+          <div class="table-wrap"><table><thead><tr><th class="check-cell"><input type="checkbox" id="select-all" aria-label="全选当前筛选结果"></th><th>任务</th><th>正文预览</th><th>校验</th></tr></thead><tbody id="tasks"></tbody></table></div>
+          <div class="empty" id="empty-tasks"><span>▤</span><strong>先导入一份任务清单</strong><p>每行一条任务。导入不会立即调用任何 Agent。</p></div>
+          <p id="task-note" class="table-note">一次最多发布 100 条任务；每个平台为每条任务创建独立会话。</p>
+        </section>
+      </div>
+      <aside class="card settings">
+        <span class="step-label">执行设置</span><h2>选择平台</h2><p class="hint">同一任务发送至所选平台。新批次 Mesh / Epsilon 各最多并发 10 条，其余平台逐条执行。</p>
+        <div class="provider"><label class="provider-heading"><input type="checkbox" id="use-codex" checked><span class="provider-icon codex">C</span><strong>Codex</strong></label><label>请求模型 ID<input id="model-codex" placeholder="留空使用默认模型" maxlength="160"></label></div>
+        <div class="provider"><label class="provider-heading"><input type="checkbox" id="use-workbuddy" checked><span class="provider-icon workbuddy">W</span><strong>WorkBuddy</strong></label><label>请求模型 ID<input id="model-workbuddy" placeholder="如 deepseek-v4.1-flash" maxlength="160"></label><p class="field-note">留空沿用客户端默认值；执行后从日志核对实际模型。</p></div>
+        <div class="provider"><label class="provider-heading"><input type="checkbox" id="use-jahead" checked><span class="provider-icon jahead">即</span><strong>即先 AI</strong></label><label>任务入口<select id="module-jahead"><option value="report">报告</option><option value="create">创造</option><option value="search">搜索</option><option value="developer">开发 · 需求阶段</option></select></label><label id="report-mode-label">报告模式<select id="mode-jahead"><option value="expert">专家模式 · 联网</option><option value="fast">快速模式 · 联网</option></select></label><p class="field-note">本地附件不会随任务自动上传。</p></div>
+        <div class="provider"><label class="provider-heading"><input type="checkbox" id="use-mesh"><span class="provider-icon mesh">M</span><strong>Mesh API</strong></label><label>模型<select id="model-mesh"><option value="">服务默认模型</option></select></label><div class="import-foot"><span id="mesh-connection">PM2 · mesh-api</span><button id="mesh-models" class="text-button" type="button">读取模型</button></div><details class="advanced"><summary>Mesh 连接设置</summary><label>API 地址<input id="url-mesh" value="http://127.0.0.1:18004" maxlength="1024"></label><label>公司 ID<input id="company-mesh" value="local-company" maxlength="1024"></label><label>项目 ID<input id="project-mesh" value="local-project" maxlength="1024"></label><label>Agent ID<input id="agent-mesh" placeholder="留空使用服务默认 Agent" maxlength="1024"></label></details><p class="field-note">新批次最多并发 10 条，每条独立 session；通过 API 读取 session-log。</p></div>
+        <div class="provider"><label class="provider-heading"><input type="checkbox" id="use-epsilon"><span class="provider-icon epsilon">E</span><strong>Epsilon API</strong></label><label>模型<select id="model-epsilon"><option value="">服务默认模型</option></select></label><div class="import-foot"><span id="epsilon-connection">HTTP / SSE</span><button id="epsilon-models" class="text-button" type="button">读取模型</button></div><details class="advanced"><summary>Epsilon 连接设置</summary><label>API 地址<input id="url-epsilon" value="http://127.0.0.1:30100" maxlength="1024"></label><label>用户 ID<input id="user-epsilon" value="local-user" maxlength="1024"></label><label>公司 ID<input id="company-epsilon" value="local-company" maxlength="1024"></label><label>项目 ID<input id="project-epsilon" value="local-project" maxlength="1024"></label><label>Agent ID<input id="agent-epsilon" placeholder="留空使用服务默认 Agent" maxlength="1024"></label></details><p class="field-note">新批次最多并发 10 条，每条独立 session；通过 SSE 记录执行过程。</p></div>
+        <details class="advanced"><summary>更多设置</summary><label>单任务超时<select id="timeout"><option value="900">15 分钟</option><option value="1800" selected>30 分钟</option><option value="3600">60 分钟</option><option value="7200">120 分钟</option></select></label><label>Codex / WorkBuddy 问答<select id="questions"><option value="recommended">选择明确推荐项，其余等待处理</option><option value="manual">全部手动处理</option></select></label><label>任务内工具权限<select id="permissions"><option value="approve">批准本任务的工具权限请求</option><option value="manual">手动处理</option></select></label></details>
+        <label class="batch-name-label">批次名称<input id="batch-title" placeholder="例如：财报分析 · 第一轮" maxlength="120"></label>
+      </aside>
+    </div>
+    <div class="publish-bar"><div><strong id="publish-summary">尚未选择任务</strong><p id="publish-note">勾选任务后，可在发布前核对完整清单和执行配置。</p></div><button id="preview" class="primary" disabled>核对并发布 <span>→</span></button></div>
+  </section>
+  <section id="history-view" hidden>
+    <div class="history-header"><p>并发上限按批次保存。新批次 Mesh / Epsilon 各最多并发 10 条；暂停只影响排队任务。</p><span id="connection">正在读取进度…</span><button id="refresh" class="secondary">刷新进度</button></div>
+    <div id="stats" class="stats"></div><div id="batches"></div>
+    <div id="empty-history" class="card empty"><span>☷</span><strong>还没有发布批次</strong><p>发布后的任务、模型记录和结果会保存在这里。</p><button id="back-prepare" class="secondary">准备第一批任务</button></div>
+  </section>
+  <section id="comparison-view" hidden>
+    <div class="card comparison-toolbar"><label>选择批次<select id="comparison-batch"></select></label><button id="comparison-refresh" class="secondary">读取最新对比</button><a id="comparison-open" class="text-button" target="_blank" rel="noopener noreferrer" hidden>独立窗口打开</a><a id="comparison-json" class="text-button" download="comparison-results.json" hidden>下载指标 JSON</a></div>
+    <p id="comparison-note" class="comparison-note">选择已结束的批次，查看与原报告一致的横向指标、工具明细和最终回答。</p>
+    <iframe id="comparison-frame" title="任务横向指标对比报告" class="comparison-frame" hidden></iframe>
+  </section>
+</main>
+<dialog id="preview-dialog"><div class="dialog-header"><div><span class="step-label">发布前核对</span><h2 id="preview-title">确认本次任务</h2></div><button class="icon-button" id="close-preview" aria-label="关闭发布核对">×</button></div><div id="preview-content"></div><div class="dialog-actions"><span id="confirm-note">点击发布会真实调用所选 Agent。</span><button id="cancel-preview" class="secondary">返回修改</button><button id="confirm-publish" class="primary">发布所选任务</button></div></dialog>
+<dialog id="detail-dialog"><div class="dialog-header"><h2 id="detail-title">任务详情</h2><button id="close-detail" class="icon-button" aria-label="关闭任务详情">×</button></div><div id="detail-content"></div></dialog>
+<dialog id="manual-dialog"><form id="manual-form"><div class="dialog-header"><h2>添加任务</h2><button type="button" id="close-manual" class="icon-button" aria-label="关闭添加任务">×</button></div><label>任务名称<input id="manual-title" maxlength="200" placeholder="选填"></label><label>任务正文 <em>*</em><textarea id="manual-prompt" required maxlength="100000" rows="7" placeholder="描述需要 Agent 完成的任务"></textarea></label><label>验收要求<textarea id="manual-criteria" maxlength="10000" rows="3" placeholder="选填，每行一项；任务执行完成后另行评测"></textarea></label><div class="dialog-actions"><button type="submit" class="primary">加入清单</button></div></form></dialog>
+</body></html>
